@@ -37,13 +37,20 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 The goal is to do some exploration of this dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following (commenting on the results of each):
 
+The Instacart dataset contains `r nrow(instacart)` observations of `r ncol(instacart)` variables, describing the orders of `r instacart %>% count(user_id) %>% nrow()` Instacart customers. Only one order per customer is captured, and each row represents a product from a particular order. 
+
+Some variables of interest include the time logging values `order_hour_of_day` and `order_dow`, the time and day of the week that an order was placed. Together with the `product_name` field, these values allow Instacart to determine their busiest times, most demanded products, and predict when certain items may need to be stocked. 
+
+The `days_since_prior_order` field might allow Instacart to reward their recurring customers through loyalty programs and offer incentives to bolster orders from infrequent customers.
+
 - How many aisles are there, and which aisles are the most items ordered from?
+
+There are 134 aisles captured, and the most items are ordered from aisles storing fruits, vegetables, and refrigerated goods, especially dairy products.
 
 ```{r}
 
 # load instacart data
 data("instacart")
-glimpse(instacart)
 
 # number of aisles 
 instacart %>% 
@@ -57,11 +64,14 @@ instacart %>%
 
 ```
 
+ 
 - Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
+
+The plot below shows the number of products ordered for each aisle with more than 10000 items ordered. The figure demonstrates the significant difference in volume between the top few aisles and the rest.
 
 ```{r}
 
-# bar chart
+# process data for plot
 ggp_orders = instacart %>% 
   group_by(aisle_id) %>% 
   mutate(n_items = n()) %>% 
@@ -71,26 +81,18 @@ ggp_orders = instacart %>%
   arrange(desc(n_items)) %>% 
   ungroup()
 
+# create bar chart for aisle volume
 ggp_orders %>%   
   ggplot(aes(x = reorder(aisle, -n_items), y = n_items)) +
   geom_bar(stat="identity") +
   labs(title = "Number of Items ordered by Aisle", x = "Aisle name", y = "Number of items ordered") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# histogram
-# ggp_hist = instacart %>% 
-#   group_by(aisle_id) %>% 
-#   mutate(n_items = n()) %>%
-#   ungroup() %>% 
-#   arrange(desc(n_items)) %>% 
-#   select(aisle, aisle_id, n_items)
-# 
-# ggplot(aes(x = aisle_id, y = n_items)) + 
-#   geom_histogram()
-
 ```
 
 - Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
+
+The table below shows the three most popular items for the “baking ingredients”, “dog food care”, and “packaged vegetables fruits” aisles. It reveals that within the high-volume aisle of “packaged vegetables fruits,” there is a significant disparity even between the top three products, indicating that the product volume may be driven by relatively few items. 
 
 ```{r}
 
@@ -117,6 +119,8 @@ df_aisle_table %>%
 ```
 
 - Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+
+This table shows the mean hour of the day that Pink Lady Apples and Coffee Ice Cream are ordered for each day of the week. It is interesting that Coffee Ice Cream tends to be ordered later in the day than Pink Lady Apples, particularly on weekdays (besides friday, when Coffee Ice Cream is ordered earliest).
 
 ```{r}
 
