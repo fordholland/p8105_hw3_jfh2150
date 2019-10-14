@@ -141,14 +141,6 @@ instacart %>%
 
 ## Problem 2
 
-This problem uses the BRFSS data. DO NOT include this dataset in your local data directory; instead, load the data from the p8105.datasets package.
-
-First, do some data cleaning:
-
-- format the data to use appropriate variable names;
-- focus on the “Overall Health” topic
-- include only responses from “Excellent” to “Poor”
-- organize responses as a factor taking levels ordered from “Poor” to “Excellent”
 
 The chunk below loads and processes the BRFSS data. I clean the names using the `janitor` package and filter to only "Overall Health" observations and parse the response field as a factor. 
 
@@ -170,10 +162,6 @@ brfss_smart2010 = brfss_smart2010 %>%
 
 ```
 
-
-Using this dataset, do or answer the following (commenting on the results of each):
-
-- In 2002, which states were observed at 7 or more locations? What about in 2010?
 
 In 2002, Connecticut, Florida, Massachusetts, North Carolina, New Jersey, and Pennsylvania were observed at 7 or more locations. Pennsylvania was observed in 10 counties, the most of any state in the dataset. 
 
@@ -202,15 +190,12 @@ brfss_smart2010 %>%
 ```
 
 
-- Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help).
-
 The spaghetti plot seems to indicate a downward trend in data_value overall, with a lot of variation. The wide band of the plot begins between 30 and 20 in 2002, and ends around 27 and 17 in 2010. The overall peak data_values appear around 2002. 
 
 There a few spikes in data_value that seem to common across states. Years 2003, 2006, and 2009 all look to have several lines forming peaks aroung the same time. These may indicate institutional changes in how BRFSS scored their survey responses or the populations that were surveyed.
 
 ```{r}
 
-# create a variable that averages the data_value across locations within a state
 brfss_smart2010 %>% 
   filter(response == "Excellent") %>% 
   group_by(location_abbr, year) %>% 
@@ -219,11 +204,12 @@ brfss_smart2010 %>%
   ungroup() %>% 
   ggplot(aes(x = year, y = data_value_avg)) +
   geom_line(aes(group = location_abbr, color = location_abbr)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  labs(title = "Average BRFSS scores over time for all states",
+       x = "Year", 
+       y = "BRFSS score")
 
 ```
-
-- Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State
 
 Between 2006 and 2010, it appears the the scores increased for "Excellent", "Very good", and "Good" responses. The distribution of "Fair" scores widened and flattened, and may have increased on average as well. Scores for "Poor" responses widened slightly in distribution. 
 
@@ -243,13 +229,6 @@ brfss_smart2010 %>%
 
 
 ## Problem 3
-
-Accelerometers have become an appealing alternative to self-report techniques for studying physical activity in observational studies and clinical trials, largely because of their relative objectivity. During observation periods, the devices measure “activity counts” in a short period; one-minute intervals are common. Because accelerometers can be worn comfortably and unobtrusively, they produce around-the-clock observations.
-
-This problem uses five weeks of accelerometer data collected on a 63 year-old male with BMI 25, who was admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). The data can be downloaded here. In this spreadsheet, variables activity.* are the activity counts for each minute of a 24-hour day starting at midnight.
-
-Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. 
-
 
 ```{r}
 
@@ -275,13 +254,8 @@ df_accel = read_csv("Data/accel_data.csv") %>%
     )
   )
 
-# check mapping of weekend indicator
-df_accel %>% count(day, is_weekend)
-
 ```
 
-
-{Describe the resulting dataset (e.g. what variables exist, how many observations, etc).}
 
 The tidied accelerometer dataset comprises `r ncol(df_accel)` columns and `r nrow(df_accel)` rows of activity count observations on 1 patient over 35 days. 
 
@@ -292,9 +266,7 @@ In long format, the timepoint for each measurement is described jointly by the `
 There is also a `day_id` that ranges from 1 to 35 and would seem to indicate the of the study, but it does not line up sequentially with the provided `day` column because the characters are sorted alphbetically, not in week sequence. 
 
  
-
-
-Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+ 
 
 Activity seems lowest on Saturday, particularly during the last 2 weeks of the study. Friday and Wednesday have the highest activity averages, and Weeks 2 and 3 at the peak of the study have highest the cumulative activity. Week 4 the lowest cumulative activity. 
 
@@ -321,14 +293,9 @@ It seems clear that this patient tends to go to sleep around 11 pm, and wake up 
 
 ```{r}
 
-summary(df_accel$activity)
-
 df_accel %>% 
-  #filter(day_id %in% c(1, 2)) %>% 
   ggplot(aes(x = activity, y = value)) +
   geom_line(aes(color = day)) +
-  # scale_y_continuous(limits = c(-100, 7000)) +
-  #theme(legend.position = "none")
   scale_x_continuous(breaks = seq(0, 1500, 180),
                      labels = c("12am", "3am", "6am", "9am", "12pm", "3pm", "6pm", "9pm", "!2am")) +
   labs(title = "Accelerometer data over 24 hour period for 35 days",
