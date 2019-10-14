@@ -112,7 +112,7 @@ df_aisle_table %>%
 ```
 
 
-This table shows the mean hour of the day that Pink Lady Apples and Coffee Ice Cream are ordered for each day of the week. It is interesting that Coffee Ice Cream tends to be ordered later in the day than Pink Lady Apples, particularly on weekdays (besides friday, when Coffee Ice Cream is ordered earliest).
+This table shows the mean hour of the day that Pink Lady Apples and Coffee Ice Cream are ordered for each day of the week. It is interesting that Coffee Ice Cream tends to be ordered later in the day than Pink Lady Apples, particularly on weekdays (besides Friday, when Coffee Ice Cream is ordered earliest).
 
 ```{r}
 
@@ -133,7 +133,7 @@ instacart %>%
                   "Thursday",
                   "Friday",
                   "Saturday"),
-    caption = "Mean hour of the day of product purcase",
+    caption = "Mean hour of the day of product purchase",
     digits = 2)
 
 ```
@@ -176,7 +176,7 @@ brfss_smart2010 %>%
 
 ```
 
-In 2010, a total of 14 states, abbreviated below, were observed in 7 or more counties. Florida led the pack with observations from 41 counties. The number of observed counties per state increased significatly from 2002 to 2010. This increase suggests that the program was expanded in that period and improved it's data collection capabilities.  
+In 2010, a total of 14 states, abbreviated below, were observed in 7 or more counties. Florida led the pack with observations from 41 counties. The number of observed counties per state increased significantly from 2002 to 2010. This increase suggests that the program was expanded in that period and improved it's data collection capabilities.  
 
 ```{r}
 
@@ -192,7 +192,7 @@ brfss_smart2010 %>%
 
 The spaghetti plot seems to indicate a downward trend in data_value overall, with a lot of variation. The wide band of the plot begins between 30 and 20 in 2002, and ends around 27 and 17 in 2010. The overall peak data_values appear around 2002. 
 
-There a few spikes in data_value that seem to common across states. Years 2003, 2006, and 2009 all look to have several lines forming peaks aroung the same time. These may indicate institutional changes in how BRFSS scored their survey responses or the populations that were surveyed.
+There a few spikes in data_value that seem to common across states. Years 2003, 2006, and 2009 all look to have several lines forming peaks around the same time. These may indicate institutional changes in how BRFSS scored their survey responses or the populations that were surveyed.
 
 ```{r}
 
@@ -211,7 +211,7 @@ brfss_smart2010 %>%
 
 ```
 
-Between 2006 and 2010, it appears the the scores increased for "Excellent", "Very good", and "Good" responses. The distribution of "Fair" scores widened and flattened, and may have increased on average as well. Scores for "Poor" responses widened slightly in distribution. 
+Between 2006 and 2010, it appears that the scores increased for "Excellent", "Very good", and "Good" responses. The distribution of "Fair" scores widened and flattened, and may have increased on average as well. Scores for "Poor" responses widened slightly in distribution. 
 
 In both years, "Very good" and "Good" responses are distributed around the highest scores, and "Poor" and "Fair" responses around the lowest.
 
@@ -259,13 +259,13 @@ df_accel = read_csv("Data/accel_data.csv") %>%
 
 The tidied accelerometer dataset comprises `r ncol(df_accel)` columns and `r nrow(df_accel)` rows of activity count observations on 1 patient over 35 days. 
 
-The `value` feature contains the activity measurements for each minute of each 24 hour day. These measurements range from `r min(df_accel$value)` to `r max(df_accel$value)`, and have a mean and median of `r mean(df_accel$value)` and `r median(df_accel$value)`, respectively. 
+The `value` feature contains the activity measurements for each minute of each 24-hour day. These measurements range from `r min(df_accel$value)` to `r max(df_accel$value)`, and have a mean and median of `r mean(df_accel$value)` and `r median(df_accel$value)`, respectively. 
 
-In long format, the timepoint for each measurement is described jointly by the `week`, `day`, and `activity` columns. The week column has values of 1 to 5, representing the 5 weeks of the study. The day values contain the name of the day in character form for a particular observation. `activity`, numbererd `r min(df_accel$activity)` to `r max(df_accel$activity)` indicate the minute from midnight that a measurement was taken for each day. 
+In long format, the timepoint for each measurement is described jointly by the `week`, `day`, and `activity` columns. The week column has values of 1 to 5, representing the 5 weeks of the study. The day values contain the name of the day in character form for a particular observation. `activity`, numbered `r min(df_accel$activity)` to `r max(df_accel$activity)` indicate the minute from midnight that a measurement was taken for each day. 
 
-There is also a `day_id` that ranges from 1 to 35 and would seem to indicate the of the study, but it does not line up sequentially with the provided `day` column because the characters are sorted alphbetically, not in week sequence. 
+There is also a `day_id` that ranges from 1 to 35 and would seem to indicate the of the study, but it does not line up sequentially with the provided `day` column because the characters are sorted alphabetically, not in week sequence. 
 
- 
+<br>
  
 
 Activity seems lowest on Saturday, particularly during the last 2 weeks of the study. Friday and Wednesday have the highest activity averages, and Weeks 2 and 3 at the peak of the study have highest the cumulative activity. Week 4 the lowest cumulative activity. 
@@ -284,8 +284,6 @@ df_accel %>%
 
 ```
 
-
-Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph
 
 Activity counts on average are lowest in the mornings and nights, with activity spikes around 6 am, 12 pm, more rarely 4 pm, and 9 pm. 
 
