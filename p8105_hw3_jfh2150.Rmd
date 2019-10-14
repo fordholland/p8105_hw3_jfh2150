@@ -188,7 +188,7 @@ brfss_smart2010 %>%
 
 ```
 
-In 2010, a total of 14 states, abbreviated below, were observed in 7 or more counties. Florida led the pack with observations from 41 counties. The number of observed counties per state increased significatly from 2002 to 2010. This increase suggests that the program was expanded in the year period and improved it's data collection capabilities.  
+In 2010, a total of 14 states, abbreviated below, were observed in 7 or more counties. Florida led the pack with observations from 41 counties. The number of observed counties per state increased significatly from 2002 to 2010. This increase suggests that the program was expanded in that period and improved it's data collection capabilities.  
 
 ```{r}
 
@@ -216,6 +216,7 @@ brfss_smart2010 %>%
   group_by(location_abbr, year) %>% 
   mutate(data_value_avg = mean(data_value)) %>% 
   select(year, location_abbr, data_value_avg) %>% 
+  ungroup() %>% 
   ggplot(aes(x = year, y = data_value_avg)) +
   geom_line(aes(group = location_abbr, color = location_abbr)) +
   theme(legend.position = "none")
@@ -224,7 +225,9 @@ brfss_smart2010 %>%
 
 - Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State
 
-The response distributions appear similar between 2006 and 2010 for New York. The 
+Between 2006 and 2010, it appears the the scores increased for "Excellent", "Very good", and "Good" responses. The distribution of "Fair" scores widened and flattened, and may have increased on average as well. Scores for "Poor" responses widened slightly in distribution. 
+
+In both years, "Very good" and "Good" responses are distributed around the highest scores, and "Poor" and "Fair" responses around the lowest.
 
 ```{r}
 
@@ -232,7 +235,8 @@ brfss_smart2010 %>%
   filter(year %in% c(2006, 2010), location_abbr == "NY") %>% 
   ggplot(aes(x = data_value, fill = response)) +
   geom_density(alpha = .5) +
-  facet_grid(~year)
+  facet_grid(~year) +
+  labs(title = "Distribution of BRFSS scores in NY in 2006 and 2010", x = "BRFSS score", y = "Density", fill = "Response")
 
 ```
 
@@ -245,18 +249,6 @@ Accelerometers have become an appealing alternative to self-report techniques fo
 This problem uses five weeks of accelerometer data collected on a 63 year-old male with BMI 25, who was admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). The data can be downloaded here. In this spreadsheet, variables activity.* are the activity counts for each minute of a 24-hour day starting at midnight.
 
 Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. 
-
-{Describe the resulting dataset (e.g. what variables exist, how many observations, etc).}
-
-The tidied accelerometer dataset comprises `r ncol(df_accel)` columns and `r nrow(df_accel)` rows of activity count observations on 1 patient over 35 days. 
-
-The `value` feature contains the activity measurements for each minute of each 24 hour day. These measurements range from `r min(df_accel$value)` to `r max(df_accel$value)`, and have a mean and median of `r mean(df_accel$value)` and `r median(df_accel$value)`, respectively. 
-
-In long format, the timepoint for each measurement is described jointly by the `week`, `day`, and `activity` columns. The week column has values of 1 to 5, representing the 5 weeks of the study. The day values contain the name of the day in character form for a particular observation. `activity`, numbererd `r min(df_accel$activity)` to `r max(df_accel$activity)` indicate the minute from midnight that a measurement was taken for each day. 
-
-There is also a `day_id` that ranges from 1 to 35 and would seem to indicate the of the study, but it does not line up sequentially with the provided `day` column because the characters are sorted alphbetically, not in week sequence. 
-
-{Since these values don't align with the actual order of the study, I use `week` and `day` groups to identify particular days.}  
 
 
 ```{r}
@@ -289,6 +281,19 @@ df_accel %>% count(day, is_weekend)
 ```
 
 
+{Describe the resulting dataset (e.g. what variables exist, how many observations, etc).}
+
+The tidied accelerometer dataset comprises `r ncol(df_accel)` columns and `r nrow(df_accel)` rows of activity count observations on 1 patient over 35 days. 
+
+The `value` feature contains the activity measurements for each minute of each 24 hour day. These measurements range from `r min(df_accel$value)` to `r max(df_accel$value)`, and have a mean and median of `r mean(df_accel$value)` and `r median(df_accel$value)`, respectively. 
+
+In long format, the timepoint for each measurement is described jointly by the `week`, `day`, and `activity` columns. The week column has values of 1 to 5, representing the 5 weeks of the study. The day values contain the name of the day in character form for a particular observation. `activity`, numbererd `r min(df_accel$activity)` to `r max(df_accel$activity)` indicate the minute from midnight that a measurement was taken for each day. 
+
+There is also a `day_id` that ranges from 1 to 35 and would seem to indicate the of the study, but it does not line up sequentially with the provided `day` column because the characters are sorted alphbetically, not in week sequence. 
+
+ 
+
+
 Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
 
 Activity seems lowest on Saturday, particularly during the last 2 weeks of the study. Friday and Wednesday have the highest activity averages, and Weeks 2 and 3 at the peak of the study have highest the cumulative activity. Week 4 the lowest cumulative activity. 
@@ -309,6 +314,10 @@ df_accel %>%
 
 
 Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph
+
+Activity counts on average are lowest in the mornings and nights, with activity spikes around 6 am, 12 pm, more rarely 4 pm, and 9 pm. 
+
+It seems clear that this patient tends to go to sleep around 11 pm, and wake up around 6 am. Furthermore, he engages in the most physical activity between 9 am and 1 pm, and 7 pm and 10 pm.
 
 ```{r}
 
