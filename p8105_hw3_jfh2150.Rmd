@@ -280,6 +280,7 @@ df_accel %>%
   distinct(day, week, daily_total) %>% 
   ungroup() %>% 
   arrange(day) %>% 
+  rename(Week = week) %>% 
   pivot_wider(names_from = day, values_from = daily_total) %>% 
   knitr::kable(digits = 2)
 
