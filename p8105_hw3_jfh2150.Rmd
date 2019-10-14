@@ -35,15 +35,11 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 ## Problem 1
 
-The goal is to do some exploration of this dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following (commenting on the results of each):
+The Instacart dataset contains `r nrow(instacart)` observations of `r ncol(instacart)` variables, describing the orders of `r instacart %>% count(user_id) %>% nrow()` Instacart customers. Only one order per customer is captured, and each row represents a product from a particular order.
 
-The Instacart dataset contains `r nrow(instacart)` observations of `r ncol(instacart)` variables, describing the orders of `r instacart %>% count(user_id) %>% nrow()` Instacart customers. Only one order per customer is captured, and each row represents a product from a particular order. 
+Some variables of interest include the time logging values `order_hour_of_day` and `order_dow`, the time and day of the week that an order was placed. Together with the `product_name` field, these values allow Instacart to determine their busiest times and most demanded products, and predict when certain items may need to be stocked. The mean hour of the day for all orders is `r instacart %>% summarize(mean = mean(order_hour_of_day))`, or about 1:30 pm. Orders hours range from `r range(instacart$order_hour_of_day)[1]` to `r range(instacart$order_hour_of_day)[2]`, or midnight to 11 pm. 
 
-Some variables of interest include the time logging values `order_hour_of_day` and `order_dow`, the time and day of the week that an order was placed. Together with the `product_name` field, these values allow Instacart to determine their busiest times, most demanded products, and predict when certain items may need to be stocked. 
-
-The `days_since_prior_order` field might allow Instacart to reward their recurring customers through loyalty programs and offer incentives to bolster orders from infrequent customers.
-
-- How many aisles are there, and which aisles are the most items ordered from?
+The `days_since_prior_order` field, recording the days since the last order for a customer, might allow Instacart to reward their recurring customers through loyalty programs and offer incentives to bolster orders from infrequent customers. The mean and median days since prior order are `r round(mean(instacart$days_since_prior_order))` and `r median(instacart$days_since_prior_order)`, respectively.
 
 There are 134 aisles captured, and the most items are ordered from aisles storing fruits, vegetables, and refrigerated goods, especially dairy products.
 
@@ -64,8 +60,6 @@ instacart %>%
 
 ```
 
- 
-- Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
 
 The plot below shows the number of products ordered for each aisle with more than 10000 items ordered. The figure demonstrates the significant difference in volume between the top few aisles and the rest.
 
@@ -84,18 +78,18 @@ ggp_orders = instacart %>%
 # create bar chart for aisle volume
 ggp_orders %>%   
   ggplot(aes(x = reorder(aisle, -n_items), y = n_items)) +
-  geom_bar(stat="identity") +
+  geom_bar(stat = "identity") +
   labs(title = "Number of Items ordered by Aisle", x = "Aisle name", y = "Number of items ordered") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
-- Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
 
-The table below shows the three most popular items for the “baking ingredients”, “dog food care”, and “packaged vegetables fruits” aisles. It reveals that within the high-volume aisle of “packaged vegetables fruits,” there is a significant disparity even between the top three products, indicating that the product volume may be driven by relatively few items. 
+The table below shows the three most popular items for the “baking ingredients”, “dog food care”, and “packaged vegetables fruits” aisles. It reveals that within the high-volume aisle of “packaged vegetables fruits,” there is a significant disparity even between the top three products, suggesting that the total product volume may be driven by relatively few items. 
 
 ```{r}
 
+# process data for table
 df_aisle_table = instacart %>% 
   group_by(aisle) %>% 
   filter(aisle %in% 
@@ -108,37 +102,27 @@ df_aisle_table = instacart %>%
   arrange(desc(n)) %>% 
   ungroup()
 
+# create table of 3 most popular products by aisle
 df_aisle_table %>% 
   knitr::kable(
     col.names = c("Aisle name", "Product name", "Number ordered"),
     caption = "Three most ordered items for \"baking ingredients\", \"dog food care\", and \"packaged vegetables and fruits\" aisles"
   )
 
-
-
 ```
 
-- Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
 This table shows the mean hour of the day that Pink Lady Apples and Coffee Ice Cream are ordered for each day of the week. It is interesting that Coffee Ice Cream tends to be ordered later in the day than Pink Lady Apples, particularly on weekdays (besides friday, when Coffee Ice Cream is ordered earliest).
 
 ```{r}
 
+# process data and create table
 instacart %>% 
   filter(product_name == "Pink Lady Apples" | 
            product_name == "Coffee Ice Cream") %>% 
   group_by(order_dow, product_name) %>% 
   summarize(mean = mean(order_hour_of_day)) %>% 
   ungroup() %>% 
-  # mutate(order_dow = order_dow %>% 
-  #          as.character() %>% 
-  #          recode("0" = "Sunday",
-  #                 "1" = "Monday",
-  #                 "2" = "Tuesday",
-  #                 "3" = "Wednesday",
-  #                 "4" = "Thursday",
-  #                 "5" = "Friday",
-  #                 "6" = "Saturday")) %>% 
   pivot_wider(names_from = order_dow, values_from = mean) %>% 
   knitr::kable(
     col.names = c("Product name",
@@ -166,13 +150,19 @@ First, do some data cleaning:
 - include only responses from “Excellent” to “Poor”
 - organize responses as a factor taking levels ordered from “Poor” to “Excellent”
 
+The chunk below loads and processes the BRFSS data. I clean the names using the `janitor` package and filter to only "Overall Health" observations and parse the response field as a factor. 
+
 ```{r}
 
 data("brfss_smart2010")
 
 brfss_smart2010 = brfss_smart2010 %>% 
   janitor::clean_names() %>% 
-  #rename(resp_id = respid) %>% 
+  rename(
+    location_abbr = locationabbr,
+    location_desc = locationdesc,
+    resp_id = respid
+  ) %>% 
   filter(topic == "Overall Health") %>% 
   # no other response values to exclude for overall health
   mutate(response = response %>% 
@@ -185,51 +175,62 @@ Using this dataset, do or answer the following (commenting on the results of eac
 
 - In 2002, which states were observed at 7 or more locations? What about in 2010?
 
+In 2002, Connecticut, Florida, Massachusetts, North Carolina, New Jersey, and Pennsylvania were observed at 7 or more locations. Pennsylvania was observed in 10 counties, the most of any state in the dataset. 
+
 ```{r}
 
-# brfss_smart2010 %>% 
-#   separate(locationdesc, into = c("state", "county"), sep = " - ") %>% 
-#   count(state, county) %>% 
-#   filter(n() > 7)
-
-df_states_02 <- brfss_smart2010 %>% 
+brfss_smart2010 %>% 
   filter(year == 2002) %>% 
-  group_by(locationabbr) %>% 
-  filter(n() > 7) %>% 
-  distinct(locationabbr)
+  count(location_abbr, location_desc) %>% 
+  group_by(location_abbr) %>% 
+  filter(n() >= 7) %>% 
+  distinct(location_abbr)
 
-df_states_10 <- brfss_smart2010 %>% 
+```
+
+In 2010, a total of 14 states, abbreviated below, were observed in 7 or more counties. Florida led the pack with observations from 41 counties. The number of observed counties per state increased significatly from 2002 to 2010. This increase suggests that the program was expanded in the year period and improved it's data collection capabilities.  
+
+```{r}
+
+brfss_smart2010 %>% 
   filter(year == 2010) %>% 
-  group_by(locationabbr) %>% 
-  filter(n() > 7) %>% 
-  distinct(locationabbr)
+  count(location_abbr, location_desc) %>% 
+  group_by(location_abbr) %>% 
+  filter(n() >= 7) %>% 
+  distinct(location_abbr)
 
 ```
 
 
 - Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help).
 
+The spaghetti plot seems to indicate a downward trend in data_value overall, with a lot of variation. The wide band of the plot begins between 30 and 20 in 2002, and ends around 27 and 17 in 2010. The overall peak data_values appear around 2002. 
+
+There a few spikes in data_value that seem to common across states. Years 2003, 2006, and 2009 all look to have several lines forming peaks aroung the same time. These may indicate institutional changes in how BRFSS scored their survey responses or the populations that were surveyed.
+
 ```{r}
 
 # create a variable that averages the data_value across locations within a state
 brfss_smart2010 %>% 
   filter(response == "Excellent") %>% 
-  group_by(locationabbr, year) %>% 
+  group_by(location_abbr, year) %>% 
   mutate(data_value_avg = mean(data_value)) %>% 
-  select(year, locationabbr, data_value_avg) %>% 
+  select(year, location_abbr, data_value_avg) %>% 
   ggplot(aes(x = year, y = data_value_avg)) +
-  geom_line(aes(group = locationabbr, color = locationabbr)) +
+  geom_line(aes(group = location_abbr, color = location_abbr)) +
   theme(legend.position = "none")
 
 ```
 
 - Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State
 
+The response distributions appear similar between 2006 and 2010 for New York. The 
+
 ```{r}
 
 brfss_smart2010 %>% 
-  filter(year %in% c(2006, 2010)) %>% 
-  ggplot(aes(x = response, fill = response)) +
+  filter(year %in% c(2006, 2010), location_abbr == "NY") %>% 
+  ggplot(aes(x = data_value, fill = response)) +
   geom_density(alpha = .5) +
   facet_grid(~year)
 
@@ -246,6 +247,17 @@ This problem uses five weeks of accelerometer data collected on a 63 year-old ma
 Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. 
 
 {Describe the resulting dataset (e.g. what variables exist, how many observations, etc).}
+
+The tidied accelerometer dataset comprises `r ncol(df_accel)` columns and `r nrow(df_accel)` rows of activity count observations on 1 patient over 35 days. 
+
+The `value` feature contains the activity measurements for each minute of each 24 hour day. These measurements range from `r min(df_accel$value)` to `r max(df_accel$value)`, and have a mean and median of `r mean(df_accel$value)` and `r median(df_accel$value)`, respectively. 
+
+In long format, the timepoint for each measurement is described jointly by the `week`, `day`, and `activity` columns. The week column has values of 1 to 5, representing the 5 weeks of the study. The day values contain the name of the day in character form for a particular observation. `activity`, numbererd `r min(df_accel$activity)` to `r max(df_accel$activity)` indicate the minute from midnight that a measurement was taken for each day. 
+
+There is also a `day_id` that ranges from 1 to 35 and would seem to indicate the of the study, but it does not line up sequentially with the provided `day` column because the characters are sorted alphbetically, not in week sequence. 
+
+{Since these values don't align with the actual order of the study, I use `week` and `day` groups to identify particular days.}  
+
 
 ```{r}
 
@@ -279,7 +291,8 @@ df_accel %>% count(day, is_weekend)
 
 Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
 
-Activity seems lowest on saturday, particularly in last 2 weeks; fri and wed have the highest; weeks 2 and 3 have the activity, week 4 the lowest. 
+Activity seems lowest on Saturday, particularly during the last 2 weeks of the study. Friday and Wednesday have the highest activity averages, and Weeks 2 and 3 at the peak of the study have highest the cumulative activity. Week 4 the lowest cumulative activity. 
+
 ```{r}
 
 df_accel %>% 
@@ -291,8 +304,6 @@ df_accel %>%
   ungroup() %>% 
   arrange(day) %>% 
   pivot_wider(names_from = day, values_from = daily_total)
-
-
 
 ```
 
@@ -315,12 +326,6 @@ df_accel %>%
        x = "Time of day",
        y = "Activity count",
        color = "Day of the week")
-  
-
-
-
-
-
 
 ```
 
